@@ -124,28 +124,16 @@ function App() {
       <header className="border-b border-slate-300 bg-white/80 backdrop-blur">
         <div className="mx-auto flex w-full max-w-6xl items-center justify-between px-4 py-4">
           <h1 className="text-xl font-semibold text-slate-900">Live Numeric Graph</h1>
-          <nav className="flex gap-2">
-            <button
-              onClick={() => navigateTo('submit')}
-              className={`rounded-md px-4 py-2 text-sm ${
-                currentPage === 'submit'
-                  ? 'bg-blue-600 text-white'
-                  : 'bg-white text-slate-700 ring-1 ring-slate-300 hover:bg-slate-100'
-              }`}
-            >
-              Submit
-            </button>
-            <button
-              onClick={() => navigateTo('results')}
-              className={`rounded-md px-4 py-2 text-sm ${
-                currentPage === 'results'
-                  ? 'bg-blue-600 text-white'
-                  : 'bg-white text-slate-700 ring-1 ring-slate-300 hover:bg-slate-100'
-              }`}
-            >
-              Results
-            </button>
-          </nav>
+          {currentPage === 'results' ? (
+            <nav className="flex gap-2">
+              <button
+                onClick={() => navigateTo('submit')}
+                className="rounded-md bg-white px-4 py-2 text-sm text-slate-700 ring-1 ring-slate-300 hover:bg-slate-100"
+              >
+                Submit
+              </button>
+            </nav>
+          ) : null}
         </div>
       </header>
 
@@ -195,26 +183,28 @@ function App() {
           </section>
         ) : null}
 
-        <section className="mt-8 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-          <h2 className="text-lg font-semibold text-slate-900">Live Results</h2>
-          <p className="mt-2 text-sm text-slate-600">
-            Updates in real time as participants submit values.
-          </p>
+        {currentPage === 'results' ? (
+          <section className="mt-8 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+            <h2 className="text-lg font-semibold text-slate-900">Live Results</h2>
+            <p className="mt-2 text-sm text-slate-600">
+              Updates in real time as participants submit values.
+            </p>
 
-          <div className="mt-6">
-            <StatsCards
-              total={stats.total}
-              average={formatNumber(stats.average)}
-              median={formatNumber(stats.median)}
-            />
-          </div>
+            <div className="mt-6">
+              <StatsCards
+                total={stats.total}
+                average={formatNumber(stats.average)}
+                median={formatNumber(stats.median)}
+              />
+            </div>
 
-          <div className="mt-8">
-            <Suspense fallback={<p className="text-sm text-slate-500">Loading chart...</p>}>
-              <Histogram buckets={stats.buckets} />
-            </Suspense>
-          </div>
-        </section>
+            <div className="mt-8">
+              <Suspense fallback={<p className="text-sm text-slate-500">Loading chart...</p>}>
+                <Histogram buckets={stats.buckets} />
+              </Suspense>
+            </div>
+          </section>
+        ) : null}
       </main>
     </div>
   )
