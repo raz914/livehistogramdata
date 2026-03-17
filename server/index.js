@@ -127,6 +127,43 @@ app.post('/api/admin/reset', (req, res) => {
   })
 })
 
+app.get('/api/admin/config', (req, res) => {
+  if (!hasValidAdminKey(req)) {
+    return res.status(401).json({
+      error: 'unauthorized',
+      message: 'A valid admin key is required.',
+    })
+  }
+
+  return res.status(200).json({
+    ok: true,
+    config: store.getAdminConfig(),
+  })
+})
+
+app.post('/api/admin/config', (req, res) => {
+  if (!hasValidAdminKey(req)) {
+    return res.status(401).json({
+      error: 'unauthorized',
+      message: 'A valid admin key is required.',
+    })
+  }
+
+  const { allowMultiplePerSession } = req.body ?? {}
+  if (typeof allowMultiplePerSession !== 'boolean') {
+    return res.status(400).json({
+      error: 'invalid_config',
+      message: 'allowMultiplePerSession must be a boolean.',
+    })
+  }
+
+  const next = store.setAdminConfig({ allowMultiplePerSession })
+  return res.status(200).json({
+    ok: true,
+    config: next,
+  })
+})
+
 setInterval(() => {
   store.cleanupExpiredRecords()
   broadcastStats()

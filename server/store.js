@@ -9,6 +9,16 @@ export function createStore(config = APP_CONFIG) {
   const submissions = []
   const sessionMap = new Map()
   const ipLastSubmissionMap = new Map()
+  const adminConfig = {
+    allowMultiplePerSession: Boolean(config.allowMultiplePerSession),
+  }
+
+  function rebuildSessionMapFromSubmissions() {
+    sessionMap.clear()
+    for (const item of submissions) {
+      sessionMap.set(item.sessionId, item.createdAt)
+    }
+  }
 
   function cleanupExpiredRecords() {
     const cutoff = now() - config.dataTtlMs
@@ -35,9 +45,11 @@ export function createStore(config = APP_CONFIG) {
     cleanupExpiredRecords()
 
     const currentTime = now()
-    const sessionExists = sessionMap.has(sessionId)
-    if (sessionExists) {
-      return { ok: false, reason: 'session_duplicate' }
+    if (!adminConfig.allowMultiplePerSession) {
+      const sessionExists = sessionMap.has(sessionId)
+      if (sessionExists) {
+        return { ok: false, reason: 'session_duplicate' }
+      }
     }
 
     const ipLastSubmittedAt = ipLastSubmissionMap.get(ip)
@@ -51,10 +63,32 @@ export function createStore(config = APP_CONFIG) {
       ip,
       createdAt: currentTime,
     })
-    sessionMap.set(sessionId, currentTime)
+    if (!adminConfig.allowMultiplePerSession) {
+      sessionMap.set(sessionId, currentTime)
+    }
     ipLastSubmissionMap.set(ip, currentTime)
 
     return { ok: true }
+  }
+
+  function getAdminConfig() {
+    return {
+      allowMultiplePerSession: adminConfig.allowMultiplePerSession,
+    }
+  }
+
+  function setAdminConfig(next = {}) {
+    if (typeof next.allowMultiplePerSession === 'boolean') {
+      adminConfig.allowMultiplePerSession = next.allowMultiplePerSession
+
+      if (adminConfig.allowMultiplePerSession) {
+        sessionMap.clear()
+      } else {
+        rebuildSessionMapFromSubmissions()
+      }
+    }
+
+    return getAdminConfig()
   }
 
   function getStatsPayload() {
@@ -81,6 +115,8 @@ export function createStore(config = APP_CONFIG) {
 
   return {
     addSubmission,
+    getAdminConfig,
+    setAdminConfig,
     getStatsPayload,
     cleanupExpiredRecords,
     resetAllData,

@@ -54,3 +54,61 @@ export async function submitValue({ value, sessionId }) {
     }
   }
 }
+
+export async function adminGetConfig({ adminKey }) {
+  const response = await fetch(`${API_BASE_URL}/api/admin/config`, {
+    headers: {
+      'x-admin-key': adminKey,
+    },
+  })
+
+  const payload = await response.json().catch(() => ({}))
+  if (!response.ok) {
+    return {
+      ok: false,
+      message: payload?.message ?? 'Unable to load admin config.',
+    }
+  }
+
+  return { ok: true, config: payload.config }
+}
+
+export async function adminSetConfig({ adminKey, allowMultiplePerSession }) {
+  const response = await fetch(`${API_BASE_URL}/api/admin/config`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'x-admin-key': adminKey,
+    },
+    body: JSON.stringify({ allowMultiplePerSession }),
+  })
+
+  const payload = await response.json().catch(() => ({}))
+  if (!response.ok) {
+    return {
+      ok: false,
+      message: payload?.message ?? 'Unable to update admin config.',
+    }
+  }
+
+  return { ok: true, config: payload.config }
+}
+
+export async function adminResetData({ adminKey }) {
+  const response = await fetch(`${API_BASE_URL}/api/admin/reset`, {
+    method: 'POST',
+    headers: {
+      'x-admin-key': adminKey,
+    },
+  })
+
+  const payload = await response.json().catch(() => ({}))
+  if (!response.ok) {
+    return {
+      ok: false,
+      message: payload?.message ?? 'Unable to reset event data.',
+    }
+  }
+
+  return { ok: true, stats: payload.stats, message: payload.message }
+}

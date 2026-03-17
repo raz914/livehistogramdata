@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "vite",
     "dev:server": "node --watch server/index.js",
+    "dev:server:test": "ALLOW_MULTIPLE_SUBMISSIONS_PER_SESSION=true node --watch server/index.js",
     "dev:client": "vite",
     "dev:all": "concurrently \"npm run dev:server\" \"npm run dev:client\"",
     "build": "vite build",
