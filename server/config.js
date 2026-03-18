@@ -11,6 +11,7 @@ export const APP_CONFIG = {
   minValue: 1,
   maxValue: 8,
   bucketSize: 0.5,
+  trueValue: null,
   dataTtlMs: 3 * 60 * 60 * 1000,
   ipCooldownMs,
   /** When true, same browser session can submit multiple times (for client testing). */

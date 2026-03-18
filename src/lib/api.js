@@ -73,14 +73,14 @@ export async function adminGetConfig({ adminKey }) {
   return { ok: true, config: payload.config }
 }
 
-export async function adminSetConfig({ adminKey, allowMultiplePerSession }) {
+export async function adminSetConfig({ adminKey, updates }) {
   const response = await fetch(`${API_BASE_URL}/api/admin/config`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
       'x-admin-key': adminKey,
     },
-    body: JSON.stringify({ allowMultiplePerSession }),
+    body: JSON.stringify(updates),
   })
 
   const payload = await response.json().catch(() => ({}))

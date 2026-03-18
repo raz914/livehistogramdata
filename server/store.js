@@ -11,6 +11,8 @@ export function createStore(config = APP_CONFIG) {
   const ipLastSubmissionMap = new Map()
   const adminConfig = {
     allowMultiplePerSession: Boolean(config.allowMultiplePerSession),
+    bucketSize: config.bucketSize,
+    trueValue: config.trueValue ?? null,
   }
 
   function rebuildSessionMapFromSubmissions() {
@@ -74,6 +76,8 @@ export function createStore(config = APP_CONFIG) {
   function getAdminConfig() {
     return {
       allowMultiplePerSession: adminConfig.allowMultiplePerSession,
+      bucketSize: adminConfig.bucketSize,
+      trueValue: adminConfig.trueValue,
     }
   }
 
@@ -88,21 +92,34 @@ export function createStore(config = APP_CONFIG) {
       }
     }
 
+    if (typeof next.bucketSize === 'number') {
+      adminConfig.bucketSize = next.bucketSize
+    }
+
+    if (Object.hasOwn(next, 'trueValue')) {
+      adminConfig.trueValue = next.trueValue
+    }
+
     return getAdminConfig()
   }
 
   function getStatsPayload() {
     cleanupExpiredRecords()
+    const statsConfig = {
+      ...config,
+      bucketSize: adminConfig.bucketSize,
+      trueValue: adminConfig.trueValue,
+    }
 
     return {
       ...buildStats(
         submissions.map((item) => item.value),
-        config,
+        statsConfig,
       ),
       range: {
-        min: config.minValue,
-        max: config.maxValue,
-        bucketSize: config.bucketSize,
+        min: statsConfig.minValue,
+        max: statsConfig.maxValue,
+        bucketSize: statsConfig.bucketSize,
       },
     }
   }

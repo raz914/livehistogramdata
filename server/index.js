@@ -41,6 +41,60 @@ function hasValidAdminKey(req) {
   return typeof keyFromHeader === 'string' && keyFromHeader === adminResetKey
 }
 
+function validateAdminConfigUpdate(body = {}) {
+  const next = {}
+  const hasAllowMultiple = Object.hasOwn(body, 'allowMultiplePerSession')
+  const hasBucketSize = Object.hasOwn(body, 'bucketSize')
+  const hasTrueValue = Object.hasOwn(body, 'trueValue')
+
+  if (!hasAllowMultiple && !hasBucketSize && !hasTrueValue) {
+    return {
+      ok: false,
+      message: 'Provide at least one admin setting to update.',
+    }
+  }
+
+  if (hasAllowMultiple) {
+    if (typeof body.allowMultiplePerSession !== 'boolean') {
+      return {
+        ok: false,
+        message: 'allowMultiplePerSession must be a boolean.',
+      }
+    }
+
+    next.allowMultiplePerSession = body.allowMultiplePerSession
+  }
+
+  if (hasBucketSize) {
+    const bucketSize = body.bucketSize
+    const maxBucketSize = APP_CONFIG.maxValue - APP_CONFIG.minValue
+
+    if (typeof bucketSize !== 'number' || !Number.isFinite(bucketSize) || bucketSize <= 0 || bucketSize > maxBucketSize) {
+      return {
+        ok: false,
+        message: `bucketSize must be a number greater than 0 and at most ${maxBucketSize}.`,
+      }
+    }
+
+    next.bucketSize = bucketSize
+  }
+
+  if (hasTrueValue) {
+    const trueValue = body.trueValue
+
+    if (trueValue !== null && (typeof trueValue !== 'number' || !Number.isFinite(trueValue) || trueValue < APP_CONFIG.minValue || trueValue > APP_CONFIG.maxValue)) {
+      return {
+        ok: false,
+        message: `trueValue must be null or a number between ${APP_CONFIG.minValue} and ${APP_CONFIG.maxValue}.`,
+      }
+    }
+
+    next.trueValue = trueValue
+  }
+
+  return { ok: true, next }
+}
+
 app.get('/api/health', (_req, res) => {
   res.json({ ok: true })
 })
@@ -149,15 +203,17 @@ app.post('/api/admin/config', (req, res) => {
     })
   }
 
-  const { allowMultiplePerSession } = req.body ?? {}
-  if (typeof allowMultiplePerSession !== 'boolean') {
+  const validation = validateAdminConfigUpdate(req.body)
+  if (!validation.ok) {
     return res.status(400).json({
       error: 'invalid_config',
-      message: 'allowMultiplePerSession must be a boolean.',
+      message: validation.message,
     })
   }
 
-  const next = store.setAdminConfig({ allowMultiplePerSession })
+  const next = store.setAdminConfig(validation.next)
+  broadcastStats()
+
   return res.status(200).json({
     ok: true,
     config: next,
