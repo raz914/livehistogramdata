@@ -36,6 +36,7 @@ const DEFAULT_STATS = {
     bucketSize: DEFAULT_BUCKET_SIZE,
   },
 }
+const CURVE_MODES = ['off', 'kde', 'gaussian']
 
 function formatNumber(value) {
   if (value === null || value === undefined) {
@@ -80,6 +81,7 @@ function App() {
   const [showXAxisLabels, setShowXAxisLabels] = useState(true)
   const [showStatsDetails, setShowStatsDetails] = useState(true)
   const [showTrueValueLine, setShowTrueValueLine] = useState(true)
+  const [curveMode, setCurveMode] = useState('kde')
 
   const sessionId = useMemo(() => getOrCreateSessionId(), [])
 
@@ -258,6 +260,7 @@ function App() {
     { label: 'Standard Deviation', value: formatNumber(stats.standardDeviation) },
     { label: 'Bias', value: formatNumber(stats.bias) },
   ]
+  const nextCurveMode = CURVE_MODES[(CURVE_MODES.indexOf(curveMode) + 1) % CURVE_MODES.length]
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-100 to-slate-200 text-slate-800">
@@ -370,6 +373,13 @@ function App() {
                 >
                   True Value Line: {showTrueValueLine ? 'On' : 'Off'}
                 </button>
+                <button
+                  type="button"
+                  onClick={() => setCurveMode(nextCurveMode)}
+                  className="rounded-md bg-white px-4 py-2 text-sm text-slate-700 ring-1 ring-slate-300 hover:bg-slate-100"
+                >
+                  Curve: {curveMode === 'off' ? 'Off' : curveMode === 'kde' ? 'KDE' : 'Gaussian'}
+                </button>
               </div>
             </div>
 
@@ -384,6 +394,9 @@ function App() {
                   showXAxisLabels={showXAxisLabels}
                   trueValue={stats.trueValue}
                   showTrueValueLine={showTrueValueLine}
+                  curveMode={curveMode}
+                  average={stats.average}
+                  standardDeviation={stats.standardDeviation}
                 />
               </Suspense>
             </div>
