@@ -10,7 +10,7 @@ const ipCooldownMs =
 export const APP_CONFIG = {
   minValue: 1,
   maxValue: 8,
-  bucketSize: 0.5,
+  bucketSize: 0.1,
   trueValue: null,
   dataTtlMs: 3 * 60 * 60 * 1000,
   ipCooldownMs,

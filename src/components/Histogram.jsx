@@ -74,6 +74,21 @@ function formatTickValue(value, bucketWidth) {
   return Number(value).toFixed(getAxisPrecision(bucketWidth))
 }
 
+function formatYAxisValue(value) {
+  const numericValue = Number(value)
+
+  if (!Number.isFinite(numericValue)) {
+    return ''
+  }
+
+  const roundedToTenth = Math.round(numericValue * 10) / 10
+  const needsTwoDecimals = Math.abs(numericValue - roundedToTenth) > 1e-6
+
+  return numericValue
+    .toFixed(needsTwoDecimals ? 2 : 1)
+    .replace(/\.?0+$/, needsTwoDecimals ? '' : '.0')
+}
+
 function Histogram({
   buckets,
   showXAxisLabels,
@@ -155,7 +170,7 @@ function Histogram({
             <YAxis
               tick={{ fill: '#4b5563', fontSize: 11 }}
               domain={[0, 'auto']}
-              tickFormatter={(value) => Number(value).toFixed(1)}
+              tickFormatter={formatYAxisValue}
             />
             <Tooltip
               formatter={(value, name, payload) => {

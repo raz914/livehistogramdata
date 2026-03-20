@@ -15,7 +15,7 @@ const Histogram = lazy(() => import('./components/Histogram'))
 
 const MIN_VALUE = 1
 const MAX_VALUE = 8
-const DEFAULT_BUCKET_SIZE = 0.5
+const DEFAULT_BUCKET_SIZE = 0.1
 const DEFAULT_ADMIN_CONFIG = {
   allowMultiplePerSession: false,
   bucketSize: DEFAULT_BUCKET_SIZE,
@@ -455,7 +455,7 @@ function App() {
                           }))
                         }
                         className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 outline-none focus:border-blue-500"
-                        placeholder="0.5"
+                        placeholder="0.1"
                       />
                     </label>
 
