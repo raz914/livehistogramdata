@@ -12,6 +12,7 @@
     "build": "vite build",
     "build:client": "vite build",
     "start": "node server/index.js",
+    "submit:batch": "node submit-batch.mjs",
     "lint": "eslint .",
     "preview": "vite preview"
   },
