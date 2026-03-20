@@ -3,6 +3,13 @@ function roundTo(value, decimals = 2) {
   return Math.round(value * factor) / factor
 }
 
+function getBucketIndex(value, minValue, bucketSize, bucketCount) {
+  const normalizedOffset = roundTo((value - minValue) / bucketSize, 9)
+  const rawIndex = Math.floor(normalizedOffset)
+
+  return Math.min(rawIndex, bucketCount - 1)
+}
+
 export function createBuckets(minValue, maxValue, bucketSize) {
   const buckets = []
   const range = maxValue - minValue
@@ -58,9 +65,8 @@ export function buildStats(values, config) {
       continue
     }
 
-    const rawIndex = Math.floor((value - minValue) / bucketSize)
-    const clampedIndex = Math.min(rawIndex, buckets.length - 1)
-    buckets[clampedIndex].count += 1
+    const bucketIndex = getBucketIndex(value, minValue, bucketSize, buckets.length)
+    buckets[bucketIndex].count += 1
   }
 
   return {
